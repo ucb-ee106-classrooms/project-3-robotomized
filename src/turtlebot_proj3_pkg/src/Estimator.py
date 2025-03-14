@@ -260,8 +260,6 @@ class DeadReckoning(Estimator):
 
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
-            # TODO: Your implementation goes here!
-            # You may ONLY use self.u and self.x[0] for estimation
             x_hat_next = (
                 self.x_hat[-1][0] + self.dt,  # timestamp
                 *self.model(self.x_hat[-1], self.u[-1]),  # unpack the tuple returned by the model
@@ -296,8 +294,6 @@ class KalmanFilter(Estimator):
         super().__init__()
         self.canvas_title = 'Kalman Filter'
         self.phid = np.pi / 4
-        # TODO: Your implementation goes here!
-        # You may define the A, C, Q, R, and P matrices below.
         self.A = np.eye(4)
         self.B = np.array([
             [self.r / 2 * np.cos(self.phid), self.r / 2 * np.cos(self.phid)],
@@ -308,28 +304,34 @@ class KalmanFilter(Estimator):
         self.C = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
         # TODO: search for combo of covariance matrices producing accurate estimation
         self.Q = np.eye(4) # covariance matrix of process noise
-        self.R = np.eye(2) # covariance matrix of measurement noise
-        self.P = np.eye(4) # covariance matrix of estimation error
+        self.R = np.diag([1, 1]) # covariance matrix of measurement noise
+        self.P = np.diag([1, 1, 1, 1]) # covariance matrix of estimation error
 
     # noinspection DuplicatedCode
     # noinspection PyPep8Naming
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
-            # TODO: Your implementation goes here!
-            # You may use self.u, self.y, and self.x[0] for estimation
             # state extrapolation
-            # x_pred = self.A @ self.x_hat[-1] + self.B @ self.u[-1]
-            # # covariance extrapolation
-            # P_pred = self.A @ self.P @ self.A.T + self.Q
-            # # Kalman gain
-            # K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
-            # # state update
-            # self.x_hat[t + 1] = x_pred + K @ (self.y[t + 1] - self.C @ x_pred)
-            # # covariance update
-            # self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
-            # return self.x_hat
-            return NotImplementedError
-
+            x_hat_prev = np.array(self.x_hat[-1])[2:].reshape((4, 1))  # exclude timestamp
+            u_prev = np.array(self.u[-1])[1:].reshape((2, 1))  # exclude timestamp
+            x_pred = self.A @ x_hat_prev + self.B @ u_prev
+            # covariance extrapolation
+            P_pred = self.A @ self.P @ self.A.T + self.Q
+            # Kalman gain
+            K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
+            # state update
+            self.x_hat.append((
+                self.x_hat[-1][0] + self.dt,  # timestamp
+                self.phid,  # fixed bearing
+                *tuple(
+                    (
+                        x_pred +
+                        K @ (np.array(self.y[-1])[1:].reshape((2, 1)) - self.C @ x_pred)
+                    ).flatten().tolist()
+                )  # unpack the tuple returned by the model
+            ))
+            # covariance update
+            self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
 
 # noinspection PyPep8Naming
 class ExtendedKalmanFilter(Estimator):
