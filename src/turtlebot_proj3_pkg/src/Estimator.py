@@ -245,31 +245,29 @@ class DeadReckoning(Estimator):
     def __init__(self):
         super().__init__()
         self.canvas_title = 'Dead Reckoning'
+        def f(x, u):    
+            matrix = np.array([
+                [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                [(self.r / 2) * np.cos(x[1]), (self.r / 2) * np.cos(x[1])],
+                [(self.r / 2) * np.sin(x[1]), (self.r / 2) * np.sin(x[1])],
+                [1, 0],
+                [0, 1]
+            ])
+            u_vector = np.array([u[1], u[2]]).reshape((2, 1))             
+            result = matrix @ u_vector
+            return result.reshape(-1)  # flatten the result to a 1D array
+        self.model = lambda x, u: tuple((np.array(x)[1:] + f(x, u)*self.dt).tolist())
 
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
             # TODO: Your implementation goes here!
             # You may ONLY use self.u and self.x[0] for estimation
-            def f(x, u, self):    
-                matrix = np.array([
-                    [-self.r / (2 * self.d), self.r / (2 * self.d)],
-                    [(self.r / 2) * np.cos(x[0]), (self.r / 2) * np.cos(x[0])],
-                    [(self.r / 2) * np.sin(x[0]), (self.r / 2) * np.sin(x[0])],
-                    [1, 0],
-                    [0, 1]
-                ])
-                u_vector = np.array([u[0], u[1]])                
-                result = matrix @ u_vector.T
-                return result
-            g = lambda x, u: x + f(x, u)*self.dt
-
-            # the algorithm
-            t = 0
-            self.x_hat[t] = self.x[0]
-            while t <= self.t - 1:
-                self.x_hat[t + 1] = g(self.x_hat[t], self.u[t])
-                t = t + 1
-            return x_hat
+            x_hat_next = (
+                self.x_hat[-1][0] + self.dt,  # timestamp
+                *self.model(self.x_hat[-1], self.u[-1]),  # unpack the tuple returned by the model
+            )
+            print("Next Thing: ", x_hat_next)
+            self.x_hat.append(x_hat_next)
 
 
 class KalmanFilter(Estimator):
@@ -300,6 +298,18 @@ class KalmanFilter(Estimator):
         self.phid = np.pi / 4
         # TODO: Your implementation goes here!
         # You may define the A, C, Q, R, and P matrices below.
+        self.A = np.eye(4)
+        self.B = np.array([
+            [self.r / 2 * np.cos(self.phid), self.r / 2 * np.cos(self.phid)],
+            [self.r / 2 * np.sin(self.phid), self.r / 2 * np.sin(self.phid)],
+            [1, 0],
+            [0, 1],
+        ]) * self.dt
+        self.C = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+        # TODO: search for combo of covariance matrices producing accurate estimation
+        self.Q = np.eye(4) # covariance matrix of process noise
+        self.R = np.eye(2) # covariance matrix of measurement noise
+        self.P = np.eye(4) # covariance matrix of estimation error
 
     # noinspection DuplicatedCode
     # noinspection PyPep8Naming
@@ -307,7 +317,18 @@ class KalmanFilter(Estimator):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
             # TODO: Your implementation goes here!
             # You may use self.u, self.y, and self.x[0] for estimation
-            raise NotImplementedError
+            # state extrapolation
+            # x_pred = self.A @ self.x_hat[-1] + self.B @ self.u[-1]
+            # # covariance extrapolation
+            # P_pred = self.A @ self.P @ self.A.T + self.Q
+            # # Kalman gain
+            # K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
+            # # state update
+            # self.x_hat[t + 1] = x_pred + K @ (self.y[t + 1] - self.C @ x_pred)
+            # # covariance update
+            # self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+            # return self.x_hat
+            return NotImplementedError
 
 
 # noinspection PyPep8Naming
