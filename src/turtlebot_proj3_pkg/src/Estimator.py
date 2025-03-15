@@ -364,9 +364,51 @@ class ExtendedKalmanFilter(Estimator):
     def __init__(self):
         super().__init__()
         self.canvas_title = 'Extended Kalman Filter'
-        self.landmark = (0.5, 0.5)
+        self.landmark = (0.5, 0.5) # l_x, l_y for measurement (h())
         # TODO: Your implementation goes here!
         # You may define the Q, R, and P matrices below.
+        self.A = np.eye(5)
+        
+        self.C = np.array([[0, 1, 0, 0, 0], [0, 0, 1, 0, 0]])
+        # TODO: search for combo of covariance matrices producing accurate estimation
+        self.Q = np.eye(5) # covariance matrix of process noise
+        self.R = np.diag([1, 1]) # covariance matrix of measurement noise
+        self.P = np.diag([1, 1, 1, 1, 1]) # covariance matrix of estimation error
+
+        # functions
+        def f(x, u):    
+            matrix = np.array([
+                [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                [(self.r / 2) * np.cos(x[0]), (self.r / 2) * np.cos(x[0])],
+                [(self.r / 2) * np.sin(x[0]), (self.r / 2) * np.sin(x[0])],
+                [1, 0],
+                [0, 1]
+            ])
+            u_vector = np.array([u[0], u[1]]).reshape((2, 1))             
+            result = matrix @ u_vector
+            return result  # flatten the result to a 1D array
+        def A_bar(x_star, u_star):
+            A_bar = np.eye(5)  # Jacobian of g(x, u) w.r.t. x
+            A_bar[1, 0] = -self.r / (2) * np.sin(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
+            A_bar[2, 0] = self.r / (2) * np.cos(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
+            return A_bar
+        def B_bar(x_star, u_star):
+            return np.array([
+                [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                [(self.r / 2) * np.cos(x_star[0]), (self.r / 2) * np.cos(x_star[0])],
+                [(self.r / 2) * np.sin(x_star[0]), (self.r / 2) * np.sin(x_star[0])],
+                [1, 0],
+                [0, 1]
+            ]).T * self.dt  # Jacobian of g(x, u) w.r.t. u
+        self.A_bar = lambda x, u: A_bar(x, u)
+        self.model = lambda x, u: np.array(x).reshape((-1, 1)) + f(x, u)*self.dt # g(x, u)
+        def h(x):
+            # measurement function h(x) ~ returns the distance to the landmark
+            return np.array([
+                np.sqrt((self.landmark[0] - x[1])**2 + (self.landmark[1] - x[2])**2),  # distance to landmark
+                x[0]  # relative bearing
+            ]).reshape((-1, 1))
+        self.h = lambda x: h(x)
 
 
     # noinspection DuplicatedCode
@@ -374,5 +416,39 @@ class ExtendedKalmanFilter(Estimator):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
             # TODO: Your implementation goes here!
             # You may use self.u, self.y, and self.x[0] for estimation
-            raise NotImplementedError
+            # state extrapolation
+            x_hat_prev = np.array(self.x_hat[-1])[1:]  # exclude timestamp ~ x-hat[t]
+            u_prev = np.array(self.u[-1])[1:]  # exclude timestamp ~u[t]
+            x_pred = self.model(x_hat_prev, u_prev) # calculate g(x_hat, u) 
+
+            #dynamics linearization ~ calculate A[t+1]
+            self.A = self.A_bar(x_hat_prev, u_prev) # Jacobian of g(x, u) w.r.t. x
+
+            # covariance extrapolation
+            P_pred = self.A @ self.P @ self.A.T + self.Q
+
+            # measurement linearization
+            # calculate C[t+1] ~ Jacobian of h(x) w.r.t. x
+            C_bar = np.zeros((2, 5))
+            C_bar[0, 1] = (x_pred[1] - self.landmark[0]) / np.sqrt((self.landmark[0] - x_pred[1])**2 + (self.landmark[1] - x_pred[2])**2)
+            C_bar[0, 2] = (x_pred[2] - self.landmark[1]) / np.sqrt((self.landmark[0] - x_pred[1])**2 + (self.landmark[1] - x_pred[2])**2)
+            C_bar[1, 0] = 1
+            self.C = C_bar
+
+            # Kalman gain
+            K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
+
+            # state update
+            self.x_hat.append((
+                self.x_hat[-1][0] + self.dt,  # timestamp
+                *tuple(
+                    (
+                        x_pred +
+                        K @ (np.array(self.y[-1])[1:].reshape((2, 1)) - self.h(x_pred))
+                    ).flatten().tolist()
+                )  # unpack the tuple returned by the model
+            ))
+            # covariance update
+            self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+
 
