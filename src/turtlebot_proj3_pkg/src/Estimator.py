@@ -369,10 +369,10 @@ class ExtendedKalmanFilter(Estimator):
         self.A = np.eye(5)
         
         # TODO: search for combo of covariance matrices producing accurate estimation
-        self.Q = np.diag([12, 1, 2, 1, 1]) # covariance matrix of process noise
-        self.R = np.diag([15, 1]) # covariance matrix of measurement noise
+        self.Q = np.diag([3, 0.7, 2, 1, 1]) # covariance matrix of process noise
+        self.R = np.diag([7, 1]) # covariance matrix of measurement noise
         # R_11 is smoothness of landmark
-        self.P = np.diag([7, 1, 2, 0.1, 0.1]) # covariance matrix of estimation error
+        self.P = np.diag([0.7, 0.3, 0.5, 0.1, 0.1]) # covariance matrix of estimation error
 
         # functions
         def f(x, u):    
