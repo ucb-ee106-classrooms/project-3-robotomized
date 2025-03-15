@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-plt.rcParams['font.family'] = ['Arial']
-plt.rcParams['font.size'] = 14
+
+plt.rcParams["font.family"] = ["Arial"]
+plt.rcParams["font.size"] = 14
 
 
 class Estimator:
@@ -50,6 +51,7 @@ class Estimator:
     ----------
         The landmark is positioned at (0, 5, 5).
     """
+
     # noinspection PyTypeChecker
     def __init__(self, is_noisy=False):
         self.u = []
@@ -58,37 +60,35 @@ class Estimator:
         self.x_hat = []  # Your estimates go here!
         self.t = []
         self.fig, self.axd = plt.subplot_mosaic(
-            [['xz', 'phi'],
-             ['xz', 'x'],
-             ['xz', 'z']], figsize=(20.0, 10.0))
-        self.ln_xz, = self.axd['xz'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_xz_hat, = self.axd['xz'].plot([], 'o-c', label='Estimated')
-        self.ln_phi, = self.axd['phi'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_phi_hat, = self.axd['phi'].plot([], 'o-c', label='Estimated')
-        self.ln_x, = self.axd['x'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_x_hat, = self.axd['x'].plot([], 'o-c', label='Estimated')
-        self.ln_z, = self.axd['z'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_z_hat, = self.axd['z'].plot([], 'o-c', label='Estimated')
-        self.canvas_title = 'N/A'
+            [["xz", "phi"], ["xz", "x"], ["xz", "z"]], figsize=(20.0, 10.0)
+        )
+        (self.ln_xz,) = self.axd["xz"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_xz_hat,) = self.axd["xz"].plot([], "o-c", label="Estimated")
+        (self.ln_phi,) = self.axd["phi"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_phi_hat,) = self.axd["phi"].plot([], "o-c", label="Estimated")
+        (self.ln_x,) = self.axd["x"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_x_hat,) = self.axd["x"].plot([], "o-c", label="Estimated")
+        (self.ln_z,) = self.axd["z"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_z_hat,) = self.axd["z"].plot([], "o-c", label="Estimated")
+        self.canvas_title = "N/A"
 
         # Defined in dynamics.py for the dynamics model
-        # m is the mass and J is the moment of inertia of the quadrotor 
-        self.gr = 9.81 
+        # m is the mass and J is the moment of inertia of the quadrotor
+        self.gr = 9.81
         self.m = 0.92
         self.J = 0.0023
         # These are the X, Y, Z coordinates of the landmark
         self.landmark = (0, 5, 5)
 
-        # This is a (N,12) where it's time, x, u, then y_obs 
+        # This is a (N,12) where it's time, x, u, then y_obs
         if is_noisy:
-            with open('noisy_data.npy', 'rb') as f:
+            with open("noisy_data.npy", "rb") as f:
                 self.data = np.load(f)
         else:
-            with open('data.npy', 'rb') as f:
+            with open("data.npy", "rb") as f:
                 self.data = np.load(f)
 
-        self.dt = self.data[-1][0]/self.data.shape[0]
-
+        self.dt = self.data[-1][0] / self.data.shape[0]
 
     def run(self):
         for i, data in enumerate(self.data):
@@ -106,20 +106,20 @@ class Estimator:
         raise NotImplementedError
 
     def plot_init(self):
-        self.axd['xz'].set_title(self.canvas_title)
-        self.axd['xz'].set_xlabel('x (m)')
-        self.axd['xz'].set_ylabel('z (m)')
-        self.axd['xz'].set_aspect('equal', adjustable='box')
-        self.axd['xz'].legend()
-        self.axd['phi'].set_ylabel('phi (rad)')
-        self.axd['phi'].set_xlabel('t (s)')
-        self.axd['phi'].legend()
-        self.axd['x'].set_ylabel('x (m)')
-        self.axd['x'].set_xlabel('t (s)')
-        self.axd['x'].legend()
-        self.axd['z'].set_ylabel('z (m)')
-        self.axd['z'].set_xlabel('t (s)')
-        self.axd['z'].legend()
+        self.axd["xz"].set_title(self.canvas_title)
+        self.axd["xz"].set_xlabel("x (m)")
+        self.axd["xz"].set_ylabel("z (m)")
+        self.axd["xz"].set_aspect("equal", adjustable="box")
+        self.axd["xz"].legend()
+        self.axd["phi"].set_ylabel("phi (rad)")
+        self.axd["phi"].set_xlabel("t (s)")
+        self.axd["phi"].legend()
+        self.axd["x"].set_ylabel("x (m)")
+        self.axd["x"].set_xlabel("t (s)")
+        self.axd["x"].legend()
+        self.axd["z"].set_ylabel("z (m)")
+        self.axd["z"].set_xlabel("t (s)")
+        self.axd["z"].legend()
         plt.tight_layout()
 
     def plot_update(self, _):
@@ -137,28 +137,28 @@ class Estimator:
             x = [d[0] for d in data]
             z = [d[1] for d in data]
             ln.set_data(x, z)
-            self.resize_lim(self.axd['xz'], x, z)
+            self.resize_lim(self.axd["xz"], x, z)
 
     def plot_philine(self, ln, data):
         if len(data):
             t = self.t
             phi = [d[2] for d in data]
             ln.set_data(t, phi)
-            self.resize_lim(self.axd['phi'], t, phi)
+            self.resize_lim(self.axd["phi"], t, phi)
 
     def plot_xline(self, ln, data):
         if len(data):
             t = self.t
             x = [d[0] for d in data]
             ln.set_data(t, x)
-            self.resize_lim(self.axd['x'], t, x)
+            self.resize_lim(self.axd["x"], t, x)
 
     def plot_zline(self, ln, data):
         if len(data):
             t = self.t
             z = [d[1] for d in data]
             ln.set_data(t, z)
-            self.resize_lim(self.axd['z'], t, z)
+            self.resize_lim(self.axd["z"], t, z)
 
     # noinspection PyMethodMayBeStatic
     def resize_lim(self, ax, x, y):
@@ -166,6 +166,7 @@ class Estimator:
         ax.set_xlim([min(min(x) * 1.05, xlim[0]), max(max(x) * 1.05, xlim[1])])
         ylim = ax.get_ylim()
         ax.set_ylim([min(min(y) * 1.05, ylim[0]), max(max(y) * 1.05, ylim[1])])
+
 
 class OracleObserver(Estimator):
     """Oracle observer which has access to the true state.
@@ -178,9 +179,10 @@ class OracleObserver(Estimator):
     To run the oracle observer:
         $ python drone_estimator_node.py --estimator oracle_observer
     """
+
     def __init__(self, is_noisy=False):
         super().__init__(is_noisy)
-        self.canvas_title = 'Oracle Observer'
+        self.canvas_title = "Oracle Observer"
 
     def update(self, _):
         self.x_hat.append(self.x[-1])
@@ -202,34 +204,34 @@ class DeadReckoning(Estimator):
     To run dead reckoning:
         $ python drone_estimator_node.py --estimator dead_reckoning
     """
+
     def __init__(self, is_noisy=False):
         super().__init__(is_noisy)
-        self.canvas_title = 'Dead Reckoning'
+        self.canvas_title = "Dead Reckoning"
+
+        def f(x, u):
+            first_term = np.array([x[3], x[4], x[5], 0, -self.gr, 0]).reshape(6, 1)
+            second_term = np.array(
+                [
+                    [0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [-np.sin(x[2]) / self.m, 0],
+                    [np.cos(x[2]) / self.m, 0],
+                    [0, 1 / self.J],
+                ]
+            )
+            u_term = np.array([u[0], u[1]]).reshape(2, 1)
+            return first_term + second_term @ u_term
+
+        self.model = lambda x, u: np.array(x).reshape((6, 1)) + f(x, u) * self.dt
 
     def update(self, _):
         if len(self.x_hat) > 0:
-            # TODO: Your implementation goes here!
-            # You may ONLY use self.u and self.x[0] for estimation
+            # breakpoint()
             # x_dot = f = [x_dot, z_dot, phi_dot, x_ddot, z_ddot, phi_ddot]
-            def f(x, u, self):
-                first_term = np.array([x[0], x[1], x[2], 0, -self.gr, 0]).T 
-                second_term = np.array([
-                    [0, 0], 
-                    [0, 0], 
-                    [0, 0], 
-                    [-np.sin(x[2])/m, 0],
-                    [np.cos(x[2])/m, 0], 
-                    [0, 1/self.J]]) 
-                u_term = np.array([u[0], u[1]]).T
-                return first_term + second_term @ u_term
-            g = lambda x, u: x + f(x, u)*self.dt
-            t = 0
-            self.x_hat[t] = self.x[0]
-            while t <= self.t - 1:
-                self.x_hat[t + 1] = g(self.x_hat[t], self.u[t])
-                t = t + 1
-            return x_hat
-            
+            self.x_hat.append(tuple(self.model(self.x_hat[-1], self.u[-1]).flatten()))
+
 
 # noinspection PyPep8Naming
 class ExtendedKalmanFilter(Estimator):
@@ -257,33 +259,112 @@ class ExtendedKalmanFilter(Estimator):
     To run the extended Kalman filter:
         $ python drone_estimator_node.py --estimator extended_kalman_filter
     """
+
     def __init__(self, is_noisy=False):
         super().__init__(is_noisy)
-        self.canvas_title = 'Extended Kalman Filter'
+        self.canvas_title = "Extended Kalman Filter"
         # TODO: Your implementation goes here!
         # You may define the Q, R, and P matrices below.
-        self.A = None
-        self.B = None
-        self.C = None
-        self.Q = None
-        self.R = None
-        self.P = None
+        self.A = np.eye(6)
+        # self.B = None
+        # self.C = None
+        self.Q = np.diag([1, 1, 1, 1, 1, 1])
+        self.R = np.diag([1, 1])
+        self.P = np.diag([1, 1, 1, 1, 1, 1])
 
     # noinspection DuplicatedCode
     def update(self, i):
-        if len(self.x_hat) > 0: #and self.x_hat[-1][0] < self.x[-1][0]:
-            # TODO: Your implementation goes here!
+        if len(self.x_hat) > 0:  # and self.x_hat[-1][0] < self.x[-1][0]:
             # You may use self.u, self.y, and self.x[0] for estimation
-            raise NotImplementedError
+            # state extrapolation
+            x_hat_prev = np.array(self.x_hat[-1])
+            # print("x_hat_prev: ", x_hat_prev[:3])
+            u_prev = np.array(self.u[-1])
+            x_pred = self.g(x_hat_prev, u_prev)  # calculate g(x_hat, u)
+            # print("x_pred: ", x_pred.flatten()[:3])
+
+            # dynamics linearization ~ calculate A[t+1]
+            self.A = self.approx_A(x_hat_prev, u_prev)  # Jacobian of g(x, u) w.r.t. x
+
+            # covariance extrapolation
+            P_pred = self.A @ self.P @ self.A.T + self.Q
+
+            # measurement linearization
+            # calculate C[t+1] ~ Jacobian of h(x) w.r.t. x
+            self.C = self.approx_C(x_pred)
+
+            # Kalman gain
+            K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
+
+            # state update
+            self.x_hat.append(
+                tuple(
+                    (
+                        x_pred
+                        + K
+                        @ (
+                            np.array(self.y[-1]).reshape((2, 1))
+                            - self.h(x_pred, self.landmark)
+                        )
+                    )
+                    .flatten()
+                    .tolist()
+                )  # unpack the tuple returned by the model
+            )
+
+            # covariance update
+            self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
 
     def g(self, x, u):
-        raise NotImplementedError
+        """Model dynamics of quadrotor"""
+        first_term = np.array([x[3], x[4], x[5], 0, -self.gr, 0]).reshape(6, 1)
+        second_term = np.array(
+            [
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [-np.sin(x[2]) / self.m, 0],
+                [np.cos(x[2]) / self.m, 0],
+                [0, 1 / self.J],
+            ]
+        )
+        u_term = np.array([u[0], u[1]]).reshape(2, 1)
+        f_term = first_term + second_term @ u_term
+        return np.array(x).reshape((6, 1)) + f_term * self.dt
 
     def h(self, x, y_obs):
-        raise NotImplementedError
+        """Measurement model of the quadrotor"""
+        return np.array(
+            [
+                np.sqrt(
+                    (x[0] - y_obs[0]) ** 2
+                    + (x[1] - y_obs[1]) ** 2
+                    + (x[2] - y_obs[2]) ** 2
+                ),
+                x[2],
+            ]
+        )
 
     def approx_A(self, x, u):
-        raise NotImplementedError
-    
+        """Approximate the dynamics Jacobian matrix"""
+        A_bar = np.eye(6)
+        A_bar[3:, :3] += np.eye(3) * self.dt
+        A_bar[3, 2] += -np.cos(x[2]) * u[0] / self.m * self.dt
+        A_bar[4, 2] += -np.sin(x[2]) * u[0] / self.m * self.dt
+        return A_bar
+
     def approx_C(self, x):
-        raise NotImplementedError
+        """Approximate the measurement Jacobian matrix"""
+        C_bar = np.zeros((2, 6))
+        C_bar[0, 0] = (x[0] - self.landmark[0]) / np.sqrt(
+            (x[0] - self.landmark[0]) ** 2
+            + self.landmark[1] ** 2
+            + (x[1] - self.landmark[2]) ** 2
+        )
+        C_bar[0, 1] = (x[1] - self.landmark[2]) / np.sqrt(
+            (x[0] - self.landmark[0]) ** 2
+            + self.landmark[1] ** 2
+            + (x[1] - self.landmark[2]) ** 2
+        )
+        C_bar[1, 2] = 1
+        return C_bar

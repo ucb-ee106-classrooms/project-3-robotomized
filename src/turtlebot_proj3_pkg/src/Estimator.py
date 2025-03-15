@@ -2,8 +2,9 @@ import rospy
 from std_msgs.msg import Float32MultiArray
 import matplotlib.pyplot as plt
 import numpy as np
-plt.rcParams['font.family'] = ['FreeSans', 'Helvetica', 'Arial']
-plt.rcParams['font.size'] = 14
+
+plt.rcParams["font.family"] = ["FreeSans", "Helvetica", "Arial"]
+plt.rcParams["font.size"] = 14
 
 
 class Estimator:
@@ -69,6 +70,7 @@ class Estimator:
     ----------
         The frozen bearing is pi/4 and the landmark is positioned at (0.5, 0.5).
     """
+
     # noinspection PyTypeChecker
     def __init__(self):
         self.d = 0.08
@@ -79,27 +81,25 @@ class Estimator:
         self.x_hat = []  # Your estimates go here!
         self.dt = 0.1
         self.fig, self.axd = plt.subplot_mosaic(
-            [['xy', 'phi'],
-             ['xy', 'x'],
-             ['xy', 'y'],
-             ['xy', 'thl'],
-             ['xy', 'thr']], figsize=(20.0, 10.0))
-        self.ln_xy, = self.axd['xy'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_xy_hat, = self.axd['xy'].plot([], 'o-c', label='Estimated')
-        self.ln_phi, = self.axd['phi'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_phi_hat, = self.axd['phi'].plot([], 'o-c', label='Estimated')
-        self.ln_x, = self.axd['x'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_x_hat, = self.axd['x'].plot([], 'o-c', label='Estimated')
-        self.ln_y, = self.axd['y'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_y_hat, = self.axd['y'].plot([], 'o-c', label='Estimated')
-        self.ln_thl, = self.axd['thl'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_thl_hat, = self.axd['thl'].plot([], 'o-c', label='Estimated')
-        self.ln_thr, = self.axd['thr'].plot([], 'o-g', linewidth=2, label='True')
-        self.ln_thr_hat, = self.axd['thr'].plot([], 'o-c', label='Estimated')
-        self.canvas_title = 'N/A'
-        self.sub_u = rospy.Subscriber('u', Float32MultiArray, self.callback_u)
-        self.sub_x = rospy.Subscriber('x', Float32MultiArray, self.callback_x)
-        self.sub_y = rospy.Subscriber('y', Float32MultiArray, self.callback_y)
+            [["xy", "phi"], ["xy", "x"], ["xy", "y"], ["xy", "thl"], ["xy", "thr"]],
+            figsize=(20.0, 10.0),
+        )
+        (self.ln_xy,) = self.axd["xy"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_xy_hat,) = self.axd["xy"].plot([], "o-c", label="Estimated")
+        (self.ln_phi,) = self.axd["phi"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_phi_hat,) = self.axd["phi"].plot([], "o-c", label="Estimated")
+        (self.ln_x,) = self.axd["x"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_x_hat,) = self.axd["x"].plot([], "o-c", label="Estimated")
+        (self.ln_y,) = self.axd["y"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_y_hat,) = self.axd["y"].plot([], "o-c", label="Estimated")
+        (self.ln_thl,) = self.axd["thl"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_thl_hat,) = self.axd["thl"].plot([], "o-c", label="Estimated")
+        (self.ln_thr,) = self.axd["thr"].plot([], "o-g", linewidth=2, label="True")
+        (self.ln_thr_hat,) = self.axd["thr"].plot([], "o-c", label="Estimated")
+        self.canvas_title = "N/A"
+        self.sub_u = rospy.Subscriber("u", Float32MultiArray, self.callback_u)
+        self.sub_x = rospy.Subscriber("x", Float32MultiArray, self.callback_x)
+        self.sub_y = rospy.Subscriber("y", Float32MultiArray, self.callback_y)
         self.tmr_update = rospy.Timer(rospy.Duration(self.dt), self.update)
 
     def callback_u(self, msg):
@@ -117,22 +117,22 @@ class Estimator:
         raise NotImplementedError
 
     def plot_init(self):
-        self.axd['xy'].set_title(self.canvas_title)
-        self.axd['xy'].set_xlabel('x (m)')
-        self.axd['xy'].set_ylabel('y (m)')
-        self.axd['xy'].set_aspect('equal', adjustable='box')
-        self.axd['xy'].legend()
-        self.axd['phi'].set_ylabel('phi (rad)')
-        self.axd['phi'].legend()
-        self.axd['x'].set_ylabel('x (m)')
-        self.axd['x'].legend()
-        self.axd['y'].set_ylabel('y (m)')
-        self.axd['y'].legend()
-        self.axd['thl'].set_ylabel('theta L (rad)')
-        self.axd['thl'].legend()
-        self.axd['thr'].set_ylabel('theta R (rad)')
-        self.axd['thr'].set_xlabel('Time (s)')
-        self.axd['thr'].legend()
+        self.axd["xy"].set_title(self.canvas_title)
+        self.axd["xy"].set_xlabel("x (m)")
+        self.axd["xy"].set_ylabel("y (m)")
+        self.axd["xy"].set_aspect("equal", adjustable="box")
+        self.axd["xy"].legend()
+        self.axd["phi"].set_ylabel("phi (rad)")
+        self.axd["phi"].legend()
+        self.axd["x"].set_ylabel("x (m)")
+        self.axd["x"].legend()
+        self.axd["y"].set_ylabel("y (m)")
+        self.axd["y"].legend()
+        self.axd["thl"].set_ylabel("theta L (rad)")
+        self.axd["thl"].legend()
+        self.axd["thr"].set_ylabel("theta R (rad)")
+        self.axd["thr"].set_xlabel("Time (s)")
+        self.axd["thr"].legend()
         plt.tight_layout()
 
     def plot_update(self, _):
@@ -154,42 +154,42 @@ class Estimator:
             x = [d[2] for d in data]
             y = [d[3] for d in data]
             ln.set_data(x, y)
-            self.resize_lim(self.axd['xy'], x, y)
+            self.resize_lim(self.axd["xy"], x, y)
 
     def plot_philine(self, ln, data):
         if len(data):
             t = [d[0] for d in data]
             phi = [d[1] for d in data]
             ln.set_data(t, phi)
-            self.resize_lim(self.axd['phi'], t, phi)
+            self.resize_lim(self.axd["phi"], t, phi)
 
     def plot_xline(self, ln, data):
         if len(data):
             t = [d[0] for d in data]
             x = [d[2] for d in data]
             ln.set_data(t, x)
-            self.resize_lim(self.axd['x'], t, x)
+            self.resize_lim(self.axd["x"], t, x)
 
     def plot_yline(self, ln, data):
         if len(data):
             t = [d[0] for d in data]
             y = [d[3] for d in data]
             ln.set_data(t, y)
-            self.resize_lim(self.axd['y'], t, y)
+            self.resize_lim(self.axd["y"], t, y)
 
     def plot_thlline(self, ln, data):
         if len(data):
             t = [d[0] for d in data]
             thl = [d[4] for d in data]
             ln.set_data(t, thl)
-            self.resize_lim(self.axd['thl'], t, thl)
+            self.resize_lim(self.axd["thl"], t, thl)
 
     def plot_thrline(self, ln, data):
         if len(data):
             t = [d[0] for d in data]
             thr = [d[5] for d in data]
             ln.set_data(t, thr)
-            self.resize_lim(self.axd['thr'], t, thr)
+            self.resize_lim(self.axd["thr"], t, thr)
 
     # noinspection PyMethodMayBeStatic
     def resize_lim(self, ax, x, y):
@@ -213,9 +213,10 @@ class OracleObserver(Estimator):
             noise_injection:=true \
             freeze_bearing:=false
     """
+
     def __init__(self):
         super().__init__()
-        self.canvas_title = 'Oracle Observer'
+        self.canvas_title = "Oracle Observer"
 
     def update(self, _):
         self.x_hat.append(self.x[-1])
@@ -242,29 +243,35 @@ class DeadReckoning(Estimator):
     For debugging, you can simulate a noise-free unicycle model by setting
     noise_injection:=false.
     """
+
     def __init__(self):
         super().__init__()
-        self.canvas_title = 'Dead Reckoning'
-        def f(x, u):    
-            matrix = np.array([
-                [-self.r / (2 * self.d), self.r / (2 * self.d)],
-                [(self.r / 2) * np.cos(x[1]), (self.r / 2) * np.cos(x[1])],
-                [(self.r / 2) * np.sin(x[1]), (self.r / 2) * np.sin(x[1])],
-                [1, 0],
-                [0, 1]
-            ])
-            u_vector = np.array([u[1], u[2]]).reshape((2, 1))             
+        self.canvas_title = "Dead Reckoning"
+
+        def f(x, u):
+            matrix = np.array(
+                [
+                    [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                    [(self.r / 2) * np.cos(x[1]), (self.r / 2) * np.cos(x[1])],
+                    [(self.r / 2) * np.sin(x[1]), (self.r / 2) * np.sin(x[1])],
+                    [1, 0],
+                    [0, 1],
+                ]
+            )
+            u_vector = np.array([u[1], u[2]]).reshape((2, 1))
             result = matrix @ u_vector
             return result.reshape(-1)  # flatten the result to a 1D array
-        self.model = lambda x, u: tuple((np.array(x)[1:] + f(x, u)*self.dt).tolist())
+
+        self.model = lambda x, u: tuple((np.array(x)[1:] + f(x, u) * self.dt).tolist())
 
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
             x_hat_next = (
                 self.x_hat[-1][0] + self.dt,  # timestamp
-                *self.model(self.x_hat[-1], self.u[-1]),  # unpack the tuple returned by the model
+                *self.model(
+                    self.x_hat[-1], self.u[-1]
+                ),  # unpack the tuple returned by the model
             )
-            print("Next Thing: ", x_hat_next)
             self.x_hat.append(x_hat_next)
 
 
@@ -290,29 +297,37 @@ class KalmanFilter(Estimator):
             noise_injection:=true \
             freeze_bearing:=true
     """
+
     def __init__(self):
         super().__init__()
-        self.canvas_title = 'Kalman Filter'
+        self.canvas_title = "Kalman Filter"
         self.phid = np.pi / 4
         self.A = np.eye(4)
-        self.B = np.array([
-            [self.r / 2 * np.cos(self.phid), self.r / 2 * np.cos(self.phid)],
-            [self.r / 2 * np.sin(self.phid), self.r / 2 * np.sin(self.phid)],
-            [1, 0],
-            [0, 1],
-        ]) * self.dt
+        self.B = (
+            np.array(
+                [
+                    [self.r / 2 * np.cos(self.phid), self.r / 2 * np.cos(self.phid)],
+                    [self.r / 2 * np.sin(self.phid), self.r / 2 * np.sin(self.phid)],
+                    [1, 0],
+                    [0, 1],
+                ]
+            )
+            * self.dt
+        )
         self.C = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
         # TODO: search for combo of covariance matrices producing accurate estimation
-        self.Q = np.eye(4) # covariance matrix of process noise
-        self.R = np.diag([1, 1]) # covariance matrix of measurement noise
-        self.P = np.diag([1, 1, 1, 1]) # covariance matrix of estimation error
+        self.Q = np.eye(4)  # covariance matrix of process noise
+        self.R = np.diag([1, 1])  # covariance matrix of measurement noise
+        self.P = np.diag([1, 1, 1, 1])  # covariance matrix of estimation error
 
     # noinspection DuplicatedCode
     # noinspection PyPep8Naming
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
             # state extrapolation
-            x_hat_prev = np.array(self.x_hat[-1])[2:].reshape((4, 1))  # exclude timestamp
+            x_hat_prev = np.array(self.x_hat[-1])[2:].reshape(
+                (4, 1)
+            )  # exclude timestamp
             u_prev = np.array(self.u[-1])[1:].reshape((2, 1))  # exclude timestamp
             x_pred = self.A @ x_hat_prev + self.B @ u_prev
             # covariance extrapolation
@@ -320,18 +335,27 @@ class KalmanFilter(Estimator):
             # Kalman gain
             K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
             # state update
-            self.x_hat.append((
-                self.x_hat[-1][0] + self.dt,  # timestamp
-                self.phid,  # fixed bearing
-                *tuple(
-                    (
-                        x_pred +
-                        K @ (np.array(self.y[-1])[1:].reshape((2, 1)) - self.C @ x_pred)
-                    ).flatten().tolist()
-                )  # unpack the tuple returned by the model
-            ))
+            self.x_hat.append(
+                (
+                    self.x_hat[-1][0] + self.dt,  # timestamp
+                    self.phid,  # fixed bearing
+                    *tuple(
+                        (
+                            x_pred
+                            + K
+                            @ (
+                                np.array(self.y[-1])[1:].reshape((2, 1))
+                                - self.C @ x_pred
+                            )
+                        )
+                        .flatten()
+                        .tolist()
+                    ),  # unpack the tuple returned by the model
+                )
+            )
             # covariance update
             self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+
 
 # noinspection PyPep8Naming
 class ExtendedKalmanFilter(Estimator):
@@ -361,55 +385,85 @@ class ExtendedKalmanFilter(Estimator):
             noise_injection:=true \
             freeze_bearing:=false
     """
+
     def __init__(self):
         super().__init__()
-        self.canvas_title = 'Extended Kalman Filter'
-        self.landmark = (0.5, 0.5) # l_x, l_y for measurement (h())
+        self.canvas_title = "Extended Kalman Filter"
+        self.landmark = (0.5, 0.5)  # l_x, l_y for measurement (h())
         # You may define the Q, R, and P matrices below.
         self.A = np.eye(5)
-        
+
         # TODO: search for combo of covariance matrices producing accurate estimation
-        self.Q = np.diag([3, 0.7, 2, 1, 1]) # covariance matrix of process noise
-        self.R = np.diag([7, 1]) # covariance matrix of measurement noise
+        self.Q = np.diag([3, 0.7, 2, 1, 1])  # covariance matrix of process noise
+        self.R = np.diag([7, 1])  # covariance matrix of measurement noise
         # R_11 is smoothness of landmark
-        self.P = np.diag([0.7, 0.3, 0.5, 0.1, 0.1]) # covariance matrix of estimation error
+        self.P = np.diag(
+            [0.7, 0.3, 0.5, 0.1, 0.1]
+        )  # covariance matrix of estimation error
 
         # functions
-        def f(x, u):    
-            matrix = np.array([
-                [-self.r / (2 * self.d), self.r / (2 * self.d)],
-                [(self.r / 2) * np.cos(x[0]), (self.r / 2) * np.cos(x[0])],
-                [(self.r / 2) * np.sin(x[0]), (self.r / 2) * np.sin(x[0])],
-                [1, 0],
-                [0, 1]
-            ])
-            u_vector = np.array([u[0], u[1]]).reshape((2, 1))             
+        def f(x, u):
+            matrix = np.array(
+                [
+                    [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                    [(self.r / 2) * np.cos(x[0]), (self.r / 2) * np.cos(x[0])],
+                    [(self.r / 2) * np.sin(x[0]), (self.r / 2) * np.sin(x[0])],
+                    [1, 0],
+                    [0, 1],
+                ]
+            )
+            u_vector = np.array([u[0], u[1]]).reshape((2, 1))
             result = matrix @ u_vector
             return result  # flatten the result to a 1D array
+
         def A_bar(x_star, u_star):
             A_bar = np.eye(5)  # Jacobian of g(x, u) w.r.t. x
-            A_bar[1, 0] = -self.r / (2) * np.sin(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
-            A_bar[2, 0] = self.r / (2) * np.cos(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
+            A_bar[1, 0] = (
+                -self.r / (2) * np.sin(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
+            )
+            A_bar[2, 0] = (
+                self.r / (2) * np.cos(x_star[0]) * (u_star[0] + u_star[1]) * self.dt
+            )
             return A_bar
+
         def B_bar(x_star, u_star):
-            return np.array([
-                [-self.r / (2 * self.d), self.r / (2 * self.d)],
-                [(self.r / 2) * np.cos(x_star[0]), (self.r / 2) * np.cos(x_star[0])],
-                [(self.r / 2) * np.sin(x_star[0]), (self.r / 2) * np.sin(x_star[0])],
-                [1, 0],
-                [0, 1]
-            ]).T * self.dt  # Jacobian of g(x, u) w.r.t. u
+            return (
+                np.array(
+                    [
+                        [-self.r / (2 * self.d), self.r / (2 * self.d)],
+                        [
+                            (self.r / 2) * np.cos(x_star[0]),
+                            (self.r / 2) * np.cos(x_star[0]),
+                        ],
+                        [
+                            (self.r / 2) * np.sin(x_star[0]),
+                            (self.r / 2) * np.sin(x_star[0]),
+                        ],
+                        [1, 0],
+                        [0, 1],
+                    ]
+                ).T
+                * self.dt
+            )  # Jacobian of g(x, u) w.r.t. u
+
         self.A_bar = lambda x, u: A_bar(x, u)
         self.B_bar = lambda x, u: B_bar(x, u)
-        self.model = lambda x, u: np.array(x).reshape((-1, 1)) + f(x, u)*self.dt # g(x, u)
+        self.model = (
+            lambda x, u: np.array(x).reshape((-1, 1)) + f(x, u) * self.dt
+        )  # g(x, u)
+
         def h(x):
             # measurement function h(x) ~ returns the distance to the landmark
-            return np.array([
-                np.sqrt((self.landmark[0] - x[1])**2 + (self.landmark[1] - x[2])**2),  # distance to landmark
-                x[0]  # relative bearing
-            ]).reshape((-1, 1))
-        self.h = lambda x: h(x)
+            return np.array(
+                [
+                    np.sqrt(
+                        (self.landmark[0] - x[1]) ** 2 + (self.landmark[1] - x[2]) ** 2
+                    ),  # distance to landmark
+                    x[0],  # relative bearing
+                ]
+            ).reshape((-1, 1))
 
+        self.h = lambda x: h(x)
 
     # noinspection DuplicatedCode
     def update(self, _):
@@ -420,11 +474,11 @@ class ExtendedKalmanFilter(Estimator):
             x_hat_prev = np.array(self.x_hat[-1])[1:]  # exclude timestamp ~ x-hat[t]
             # print("x_hat_prev: ", x_hat_prev[:3])
             u_prev = np.array(self.u[-1])[1:]  # exclude timestamp ~u[t]
-            x_pred = self.model(x_hat_prev, u_prev) # calculate g(x_hat, u) 
+            x_pred = self.model(x_hat_prev, u_prev)  # calculate g(x_hat, u)
             # print("x_pred: ", x_pred.flatten()[:3])
 
-            #dynamics linearization ~ calculate A[t+1]
-            self.A = self.A_bar(x_hat_prev, u_prev) # Jacobian of g(x, u) w.r.t. x
+            # dynamics linearization ~ calculate A[t+1]
+            self.A = self.A_bar(x_hat_prev, u_prev)  # Jacobian of g(x, u) w.r.t. x
 
             # covariance extrapolation
             P_pred = self.A @ self.P @ self.A.T + self.Q
@@ -432,8 +486,14 @@ class ExtendedKalmanFilter(Estimator):
             # measurement linearization
             # calculate C[t+1] ~ Jacobian of h(x) w.r.t. x
             C_bar = np.zeros((2, 5))
-            C_bar[0, 1] = (x_pred[1] - self.landmark[0]) / np.sqrt((self.landmark[0] - x_pred[1])**2 + (self.landmark[1] - x_pred[2])**2)
-            C_bar[0, 2] = (x_pred[2] - self.landmark[1]) / np.sqrt((self.landmark[0] - x_pred[1])**2 + (self.landmark[1] - x_pred[2])**2)
+            C_bar[0, 1] = (x_pred[1] - self.landmark[0]) / np.sqrt(
+                (self.landmark[0] - x_pred[1]) ** 2
+                + (self.landmark[1] - x_pred[2]) ** 2
+            )
+            C_bar[0, 2] = (x_pred[2] - self.landmark[1]) / np.sqrt(
+                (self.landmark[0] - x_pred[1]) ** 2
+                + (self.landmark[1] - x_pred[2]) ** 2
+            )
             C_bar[1, 0] = 1
             self.C = C_bar
 
@@ -441,15 +501,23 @@ class ExtendedKalmanFilter(Estimator):
             K = P_pred @ self.C.T @ np.linalg.inv(self.C @ P_pred @ self.C.T + self.R)
 
             # state update
-            self.x_hat.append((
-                self.x_hat[-1][0] + self.dt,  # timestamp
-                *tuple(
-                    (
-                        x_pred +
-                        K @ (np.array(self.y[-1])[1:].reshape((2, 1)) - self.h(x_pred))
-                    ).flatten().tolist()
-                )  # unpack the tuple returned by the model
-            ))
+            self.x_hat.append(
+                (
+                    self.x_hat[-1][0] + self.dt,  # timestamp
+                    *tuple(
+                        (
+                            x_pred
+                            + K
+                            @ (
+                                np.array(self.y[-1])[1:].reshape((2, 1))
+                                - self.h(x_pred)
+                            )
+                        )
+                        .flatten()
+                        .tolist()
+                    ),  # unpack the tuple returned by the model
+                )
+            )
             # if self.x_hat[-1][1] < 0 and x_pred[0] > 0:
             #     print("uh oh\n\n")
             #     print("x_hat: ", self.x_hat[-1])
@@ -466,5 +534,3 @@ class ExtendedKalmanFilter(Estimator):
 
             # print("x_hat: ", self.x_hat[-1][1:4])
             # print()
-
-
