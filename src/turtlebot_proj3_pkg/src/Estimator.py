@@ -365,15 +365,14 @@ class ExtendedKalmanFilter(Estimator):
         super().__init__()
         self.canvas_title = 'Extended Kalman Filter'
         self.landmark = (0.5, 0.5) # l_x, l_y for measurement (h())
-        # TODO: Your implementation goes here!
         # You may define the Q, R, and P matrices below.
         self.A = np.eye(5)
         
-        self.C = np.array([[0, 1, 0, 0, 0], [0, 0, 1, 0, 0]])
         # TODO: search for combo of covariance matrices producing accurate estimation
-        self.Q = np.eye(5) # covariance matrix of process noise
-        self.R = np.diag([1, 1]) # covariance matrix of measurement noise
-        self.P = np.diag([1, 1, 1, 1, 1]) # covariance matrix of estimation error
+        self.Q = np.diag([12, 1, 2, 1, 1]) # covariance matrix of process noise
+        self.R = np.diag([15, 1]) # covariance matrix of measurement noise
+        # R_11 is smoothness of landmark
+        self.P = np.diag([7, 1, 2, 0.1, 0.1]) # covariance matrix of estimation error
 
         # functions
         def f(x, u):    
@@ -401,6 +400,7 @@ class ExtendedKalmanFilter(Estimator):
                 [0, 1]
             ]).T * self.dt  # Jacobian of g(x, u) w.r.t. u
         self.A_bar = lambda x, u: A_bar(x, u)
+        self.B_bar = lambda x, u: B_bar(x, u)
         self.model = lambda x, u: np.array(x).reshape((-1, 1)) + f(x, u)*self.dt # g(x, u)
         def h(x):
             # measurement function h(x) ~ returns the distance to the landmark
@@ -418,8 +418,10 @@ class ExtendedKalmanFilter(Estimator):
             # You may use self.u, self.y, and self.x[0] for estimation
             # state extrapolation
             x_hat_prev = np.array(self.x_hat[-1])[1:]  # exclude timestamp ~ x-hat[t]
+            # print("x_hat_prev: ", x_hat_prev[:3])
             u_prev = np.array(self.u[-1])[1:]  # exclude timestamp ~u[t]
             x_pred = self.model(x_hat_prev, u_prev) # calculate g(x_hat, u) 
+            # print("x_pred: ", x_pred.flatten()[:3])
 
             #dynamics linearization ~ calculate A[t+1]
             self.A = self.A_bar(x_hat_prev, u_prev) # Jacobian of g(x, u) w.r.t. x
@@ -448,7 +450,21 @@ class ExtendedKalmanFilter(Estimator):
                     ).flatten().tolist()
                 )  # unpack the tuple returned by the model
             ))
+            # if self.x_hat[-1][1] < 0 and x_pred[0] > 0:
+            #     print("uh oh\n\n")
+            #     print("x_hat: ", self.x_hat[-1])
+            #     print("y: ", self.y[-1])
+            #     print("y prior: ", self.y[-2])
+            #     print('\nx: ', self.x[-1])
+            #     print('x prior: ', self.x[-2])
+            #     print("\nmeasurement: ", self.h(x_pred).flatten())
+            #     print("x_pred: ", x_pred.flatten())
+            #     print("\n\n")
+
             # covariance update
             self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+
+            # print("x_hat: ", self.x_hat[-1][1:4])
+            # print()
 
 
