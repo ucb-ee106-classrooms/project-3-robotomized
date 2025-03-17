@@ -263,14 +263,12 @@ class ExtendedKalmanFilter(Estimator):
     def __init__(self, is_noisy=False):
         super().__init__(is_noisy)
         self.canvas_title = "Extended Kalman Filter"
-        # TODO: Your implementation goes here!
         # You may define the Q, R, and P matrices below.
-        self.A = np.eye(6)
-        # self.B = None
-        # self.C = None
-        self.Q = np.diag([1, 1, 1, 1, 1, 1])
-        self.R = np.diag([1, 1])
-        self.P = np.diag([1, 1, 1, 1, 1, 1])
+        self.Q = np.diag([2, 0.03, 7, 2, 13, 0.5])  # covariance matrix fo process noise
+        self.R = np.diag([1.7, 0.5])  # covariance matrix of measurement noise
+        self.P = np.diag(
+            [2, 90, 0.2, 2, 50, 0.5]
+        )  # covariance matrix of estimation error
 
     # noinspection DuplicatedCode
     def update(self, i):
