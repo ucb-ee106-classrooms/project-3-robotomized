@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import rospy
-from Estimator import \
-    OracleObserver, DeadReckoning, KalmanFilter, ExtendedKalmanFilter
+from Estimator import OracleObserver, DeadReckoning, KalmanFilter, ExtendedKalmanFilter
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+
 plt.show(block=True)
 
 
@@ -27,7 +27,8 @@ def spin(estimator):
         estimator.fig,
         estimator.plot_update,
         init_func=estimator.plot_init,
-        cache_frame_data=False)
+        cache_frame_data=False,
+    )
     plt.show(block=True)  # This functions the same as rospy.spin()
 
 
@@ -38,22 +39,22 @@ def main():
     -------
         None
     """
-    rospy.init_node('estimator_node')
-    estimator_type = rospy.get_param('estimator_type')
-    if estimator_type == 'oracle_observer':
+    rospy.init_node("estimator_node")
+    estimator_type = rospy.get_param("estimator_type")
+    if estimator_type == "oracle_observer":
         estimator = OracleObserver()
-    elif estimator_type == 'dead_reckoning':
+    elif estimator_type == "dead_reckoning":
         estimator = DeadReckoning()
-    elif estimator_type == 'kalman_filter':
+    elif estimator_type == "kalman_filter":
         estimator = KalmanFilter()
-    elif estimator_type == 'extended_kalman_filter':
+    elif estimator_type == "extended_kalman_filter":
         estimator = ExtendedKalmanFilter()
     else:
-        raise RuntimeError(
-            'Estimator type {} not supported'.format(estimator_type))
-    rospy.loginfo('Invoking estimator {}...'.format(estimator_type))
+        raise RuntimeError("Estimator type {} not supported".format(estimator_type))
+    rospy.loginfo("Invoking estimator {}...".format(estimator_type))
     spin(estimator)
+    print("Trajectory Error: ", estimator.error())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

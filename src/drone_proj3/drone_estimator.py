@@ -17,8 +17,8 @@ class Estimator:
     ----------
         u : list
             A list of system inputs, where, for the ith data point u[i],
-            u[i][1] is the thrust of the quadrotor
-            u[i][2] is right wheel rotational speed (rad/s).
+            u[i][0] is the thrust of the quadrotor
+            u[i][1] is right wheel rotational speed (rad/s).
         x : list
             A list of system states, where, for the ith data point x[i],
             x[i][0] is translational position in x (m),
@@ -167,6 +167,32 @@ class Estimator:
         ylim = ax.get_ylim()
         ax.set_ylim([min(min(y) * 1.05, ylim[0]), max(max(y) * 1.05, ylim[1])])
 
+    def error(self):
+        """Calculate the mean error between the estimated and true states."""
+        estimated_states = np.array(
+            [
+                self.x_hat[:][0],
+                self.x_hat[:][1],
+                np.cos(self.x_hat[:][2]),
+                np.sin(self.x_hat[:][2]),
+                self.x_hat[:][3],
+                self.x_hat[:][4],
+                self.x_hat[:][5],
+            ]
+        )
+        actual_states = np.array(
+            [
+                self.x[:][0],
+                self.x[:][1],
+                np.cos(self.x[:][2]),
+                np.sin(self.x[:][2]),
+                self.x[:][3],
+                self.x[:][4],
+                self.x[:][5],
+            ]
+        )
+        return np.linalg.norm(estimated_states - actual_states, axis=0)
+
 
 class OracleObserver(Estimator):
     """Oracle observer which has access to the true state.
@@ -228,7 +254,6 @@ class DeadReckoning(Estimator):
 
     def update(self, _):
         if len(self.x_hat) > 0:
-            # breakpoint()
             # x_dot = f = [x_dot, z_dot, phi_dot, x_ddot, z_ddot, phi_ddot]
             self.x_hat.append(tuple(self.model(self.x_hat[-1], self.u[-1]).flatten()))
 

@@ -46,7 +46,7 @@ def main():
     if estimator_type == "oracle":
         estimator = OracleObserver(is_noisy=True)
     elif estimator_type == "dr":
-        estimator = DeadReckoning(is_noisy=False)
+        estimator = DeadReckoning(is_noisy=True)
     elif estimator_type == "kf":
         raise RuntimeError(
             f"Estimator type: {estimator_type} is not supported for the quadrotor!"
@@ -57,6 +57,7 @@ def main():
         raise RuntimeError("Estimator type {} not supported".format(estimator_type))
     print("Invoking estimator {}...".format(estimator_type))
     spin(estimator)
+    print("Trajectory Error: ", estimator.error())
 
 
 if __name__ == "__main__":
