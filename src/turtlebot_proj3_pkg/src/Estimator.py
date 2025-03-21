@@ -198,29 +198,31 @@ class Estimator:
         ylim = ax.get_ylim()
         ax.set_ylim([min(min(y) * 1.05, ylim[0]), max(max(y) * 1.05, ylim[1])])
 
-    def error(self):
-        """Calculate the mean error between the estimated and true states."""
+    def calc_error(self):
+        """Calculate the RMSE between the estimated and true states."""
+        estimated_states = np.array(self.x_hat)
+        actual_states = np.array(self.x)
         estimated_states = np.array(
             [
-                np.cos(self.x_hat[:][1]),
-                np.sin(self.x_hat[:][1]),
-                self.x_hat[:][2],
-                self.x_hat[:][3],
-                self.x_hat[:][4],
-                self.x_hat[:][5],
+                np.cos(estimated_states[:, 1]),
+                np.sin(estimated_states[:, 1]),
+                estimated_states[:, 2],
+                estimated_states[:, 3],
+                estimated_states[:, 4],
+                estimated_states[:, 5],
             ]
         )
         actual_states = np.array(
             [
-                np.cos(self.x[:][1]),
-                np.sin(self.x[:][1]),
-                self.x[:][2],
-                self.x[:][3],
-                self.x[:][4],
-                self.x[:][5],
+                np.cos(actual_states[:, 1]),
+                np.sin(actual_states[:, 1]),
+                actual_states[:, 2],
+                actual_states[:, 3],
+                actual_states[:, 4],
+                actual_states[:, 5],
             ]
         )
-        return np.linalg.norm(estimated_states - actual_states, axis=1).mean()
+        return np.linalg.norm(estimated_states - actual_states, axis=1)
 
 
 class OracleObserver(Estimator):

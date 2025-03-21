@@ -32,7 +32,7 @@ def spin(estimator):
         init_func=estimator.plot_init,
         cache_frame_data=False,
     )
-    plt.show(block=True)  # comment for time measurement
+    # plt.show(block=True)  # comment for time measurement
 
 
 def main():
@@ -61,7 +61,7 @@ def main():
     spin(estimator)
     end_time = time.perf_counter()
     print(f"Time taken: {end_time - start_time} seconds")
-    print("Trajectory Error: ", estimator.error())
+    print("Trajectory Error: ", estimator.calc_error())
 
 
 if __name__ == "__main__":
