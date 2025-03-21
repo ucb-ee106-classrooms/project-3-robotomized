@@ -207,6 +207,8 @@ class Estimator:
         """Calculate the RMSE between the estimated and true states."""
         estimated_states = np.array(self.x_hat)
         actual_states = np.array(self.x)
+        if estimated_states.shape[0] > actual_states.shape[0]:
+            estimated_states = estimated_states[: actual_states.shape[0]]
         estimated_states = np.array(
             [
                 np.arctan2(

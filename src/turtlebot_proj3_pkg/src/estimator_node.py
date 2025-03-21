@@ -54,11 +54,17 @@ def main():
         raise RuntimeError("Estimator type {} not supported".format(estimator_type))
     rospy.loginfo("Invoking estimator {}...".format(estimator_type))
     spin(estimator)
+    print("Times: ", len(estimator.update_times))
+    print("Trajectory Error: ", len(estimator.x_hat))
+    print("Actual Trajectory: ", len(estimator.x))
     error_str = ""
     for e in estimator.calc_error():
         error_str += str(e) + ","
-    error_str += str(estimator.calc_avg_update_time())
-    print("Trajectory Error: ", error_str)
+    pos_error = np.linalg.norm(estimator.calc_error()[2:4])
+    print("Position Error: ", pos_error)
+    error_str += str(pos_error)
+    error_str += "," + str(estimator.calc_avg_update_time())
+    print("Errors: ", error_str)
 
 
 if __name__ == "__main__":
