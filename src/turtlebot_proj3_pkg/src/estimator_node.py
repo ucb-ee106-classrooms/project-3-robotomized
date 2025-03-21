@@ -3,6 +3,7 @@ import rospy
 from Estimator import OracleObserver, DeadReckoning, KalmanFilter, ExtendedKalmanFilter
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import numpy as np
 
 plt.show(block=True)
 
@@ -53,7 +54,11 @@ def main():
         raise RuntimeError("Estimator type {} not supported".format(estimator_type))
     rospy.loginfo("Invoking estimator {}...".format(estimator_type))
     spin(estimator)
-    print("Trajectory Error: ", estimator.error())
+    error_str = ""
+    for e in estimator.calc_error():
+        error_str += str(e) + ","
+    error_str += str(estimator.calc_avg_update_time())
+    print("Trajectory Error: ", error_str)
 
 
 if __name__ == "__main__":

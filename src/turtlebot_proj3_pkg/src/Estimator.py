@@ -79,6 +79,7 @@ class Estimator:
         self.x = []
         self.y = []
         self.x_hat = []  # Your estimates go here!
+        self.update_times = []
         self.dt = 0.1
         self.fig, self.axd = plt.subplot_mosaic(
             [["xy", "phi"], ["xy", "x"], ["xy", "y"], ["xy", "thl"], ["xy", "thr"]],
@@ -198,14 +199,19 @@ class Estimator:
         ylim = ax.get_ylim()
         ax.set_ylim([min(min(y) * 1.05, ylim[0]), max(max(y) * 1.05, ylim[1])])
 
+    def calc_avg_update_time(self):
+        """Calculate the average update time."""
+        return np.mean(np.array(self.update_times))
+
     def calc_error(self):
         """Calculate the RMSE between the estimated and true states."""
         estimated_states = np.array(self.x_hat)
         actual_states = np.array(self.x)
         estimated_states = np.array(
             [
-                np.cos(estimated_states[:, 1]),
-                np.sin(estimated_states[:, 1]),
+                np.arctan2(
+                    np.sin(estimated_states[:, 1]), np.cos(estimated_states[:, 1])
+                ),
                 estimated_states[:, 2],
                 estimated_states[:, 3],
                 estimated_states[:, 4],
@@ -214,8 +220,7 @@ class Estimator:
         )
         actual_states = np.array(
             [
-                np.cos(actual_states[:, 1]),
-                np.sin(actual_states[:, 1]),
+                np.arctan2(np.sin(actual_states[:, 1]), np.cos(actual_states[:, 1])),
                 actual_states[:, 2],
                 actual_states[:, 3],
                 actual_states[:, 4],
@@ -292,6 +297,7 @@ class DeadReckoning(Estimator):
 
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
+            start_time = rospy.get_time()
             x_hat_next = (
                 self.x_hat[-1][0] + self.dt,  # timestamp
                 *self.model(
@@ -299,6 +305,7 @@ class DeadReckoning(Estimator):
                 ),  # unpack the tuple returned by the model
             )
             self.x_hat.append(x_hat_next)
+            self.update_times.append(rospy.get_time() - start_time)
 
 
 class KalmanFilter(Estimator):
@@ -350,6 +357,7 @@ class KalmanFilter(Estimator):
     # noinspection PyPep8Naming
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
+            start_time = rospy.get_time()
             # state extrapolation
             x_hat_prev = np.array(self.x_hat[-1])[2:].reshape(
                 (4, 1)
@@ -381,6 +389,7 @@ class KalmanFilter(Estimator):
             )
             # covariance update
             self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+            self.update_times.append(rospy.get_time() - start_time)
 
 
 # noinspection PyPep8Naming
@@ -494,14 +503,13 @@ class ExtendedKalmanFilter(Estimator):
     # noinspection DuplicatedCode
     def update(self, _):
         if len(self.x_hat) > 0 and self.x_hat[-1][0] < self.x[-1][0]:
+            start_time = rospy.get_time()
             # TODO: Your implementation goes here!
             # You may use self.u, self.y, and self.x[0] for estimation
             # state extrapolation
             x_hat_prev = np.array(self.x_hat[-1])[1:]  # exclude timestamp ~ x-hat[t]
-            # print("x_hat_prev: ", x_hat_prev[:3])
             u_prev = np.array(self.u[-1])[1:]  # exclude timestamp ~u[t]
             x_pred = self.model(x_hat_prev, u_prev)  # calculate g(x_hat, u)
-            # print("x_pred: ", x_pred.flatten()[:3])
 
             # dynamics linearization ~ calculate A[t+1]
             self.A = self.A_bar(x_hat_prev, u_prev)  # Jacobian of g(x, u) w.r.t. x
@@ -544,19 +552,7 @@ class ExtendedKalmanFilter(Estimator):
                     ),  # unpack the tuple returned by the model
                 )
             )
-            # if self.x_hat[-1][1] < 0 and x_pred[0] > 0:
-            #     print("uh oh\n\n")
-            #     print("x_hat: ", self.x_hat[-1])
-            #     print("y: ", self.y[-1])
-            #     print("y prior: ", self.y[-2])
-            #     print('\nx: ', self.x[-1])
-            #     print('x prior: ', self.x[-2])
-            #     print("\nmeasurement: ", self.h(x_pred).flatten())
-            #     print("x_pred: ", x_pred.flatten())
-            #     print("\n\n")
 
             # covariance update
             self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
-
-            # print("x_hat: ", self.x_hat[-1][1:4])
-            # print()
+            self.update_times.append(rospy.get_time() - start_time)

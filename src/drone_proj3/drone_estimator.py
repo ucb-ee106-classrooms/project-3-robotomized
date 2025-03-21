@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 plt.rcParams["font.family"] = ["Arial"]
 plt.rcParams["font.size"] = 14
@@ -58,6 +59,7 @@ class Estimator:
         self.x = []
         self.y = []
         self.x_hat = []  # Your estimates go here!
+        self.update_times = []
         self.t = []
         self.fig, self.axd = plt.subplot_mosaic(
             [["xz", "phi"], ["xz", "x"], ["xz", "z"]], figsize=(20.0, 10.0)
@@ -167,6 +169,10 @@ class Estimator:
         ylim = ax.get_ylim()
         ax.set_ylim([min(min(y) * 1.05, ylim[0]), max(max(y) * 1.05, ylim[1])])
 
+    def calc_avg_update_time(self):
+        """Calculate the average update time."""
+        return np.mean(np.array(self.update_times))
+
     def calc_error(self):
         """Calculate the RMSE between the estimated and true states."""
         actual_states = np.array(self.x)
@@ -175,8 +181,9 @@ class Estimator:
             [
                 estimated_states[:, 0],
                 estimated_states[:, 1],
-                np.cos(estimated_states[:, 2]),
-                np.sin(estimated_states[:, 2]),
+                np.arctan2(
+                    np.sin(estimated_states[:, 2]), np.cos(estimated_states[:, 2])
+                ),
                 estimated_states[:, 3],
                 estimated_states[:, 4],
                 estimated_states[:, 5],
@@ -186,13 +193,13 @@ class Estimator:
             [
                 actual_states[:, 0],
                 actual_states[:, 1],
-                np.cos(actual_states[:, 2]),
-                np.sin(actual_states[:, 2]),
+                np.arctan2(np.sin(actual_states[:, 2]), np.cos(actual_states[:, 2])),
                 actual_states[:, 3],
                 actual_states[:, 4],
                 actual_states[:, 5],
             ]
         )
+
         return np.linalg.norm(estimated_states - actual_states, axis=1)
 
 
@@ -256,8 +263,10 @@ class DeadReckoning(Estimator):
 
     def update(self, _):
         if len(self.x_hat) > 0:
+            start_time = time.perf_counter()
             # x_dot = f = [x_dot, z_dot, phi_dot, x_ddot, z_ddot, phi_ddot]
             self.x_hat.append(tuple(self.model(self.x_hat[-1], self.u[-1]).flatten()))
+            self.update_times.append(time.perf_counter() - start_time)
 
 
 # noinspection PyPep8Naming
@@ -300,6 +309,7 @@ class ExtendedKalmanFilter(Estimator):
     # noinspection DuplicatedCode
     def update(self, i):
         if len(self.x_hat) > 0:  # and self.x_hat[-1][0] < self.x[-1][0]:
+            start_time = time.perf_counter()
             # You may use self.u, self.y, and self.x[0] for estimation
             # state extrapolation
             x_hat_prev = np.array(self.x_hat[-1])
@@ -339,6 +349,7 @@ class ExtendedKalmanFilter(Estimator):
 
             # covariance update
             self.P = (np.eye(self.P.shape[0]) - K @ self.C) @ P_pred
+            self.update_times.append(time.perf_counter() - start_time)
 
     def g(self, x, u):
         """Model dynamics of quadrotor"""
