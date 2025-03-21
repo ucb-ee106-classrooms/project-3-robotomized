@@ -3,6 +3,7 @@
 from drone_estimator import OracleObserver, DeadReckoning, ExtendedKalmanFilter
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import time
 import argparse
 
 plt.show(block=True)
@@ -31,7 +32,7 @@ def spin(estimator):
         init_func=estimator.plot_init,
         cache_frame_data=False,
     )
-    plt.show(block=True)
+    plt.show(block=True)  # comment for time measurement
 
 
 def main():
@@ -56,7 +57,10 @@ def main():
     else:
         raise RuntimeError("Estimator type {} not supported".format(estimator_type))
     print("Invoking estimator {}...".format(estimator_type))
+    start_time = time.perf_counter()
     spin(estimator)
+    end_time = time.perf_counter()
+    print(f"Time taken: {end_time - start_time} seconds")
     print("Trajectory Error: ", estimator.error())
 
 
